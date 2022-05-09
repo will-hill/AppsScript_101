@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <base target="_top">
+</head>
+<body>
+  <h1><?= data.title ?></h1>
+  <h3>total size: <?= data.totalSize ?></h3>
+  <h3>total count: <?= data.files.length ?></h3>
+  <h5><a href="<?= data.sheetsUrl ?>" target="_blank">Google Sheets</a></h5>
+  <br/>
+  <hr/>
+  <br/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-table/1.10.1/bootstrap-table.min.js"></script>
+  <script>
+    const data = <?!= JSON.stringify(data) ?>;
+    //console.log(data);      
+    var $table = $('#table');
+    $(function () {$('#table').bootstrapTable({data: data["files"]});});
+  </script>
+  <div class="container">    
+    <table id="table">
+      <thead>
+        <tr>
+          <th data-field="name">File Name</th>
+          <th data-field="size">File Size</th>
+          <th data-field="path">Folder Path</th>
+          <th data-field="mime">Mime Type</th>
+        </tr>
+      </thead>
+    </table>
+  </div>
+</body>
+</html>
