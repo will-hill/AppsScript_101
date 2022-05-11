@@ -26,44 +26,52 @@ function getFileArray(folder, parent){
   return fileArray;
 }
 
-function doGet(e) {
-  let data = {};  
-  let folderId = "1RZfi7gT7vR-d1c3Q_-quq0SnfbTKlGnL";
-  if (e != null && e.parameter != null && e.parameter.folderId != null) {
-    folderId = e.parameter.folderId;
-  }
-  
+function doGet(e) {  
+
+  console.log("folderId: " + e.parameter.folderId);
+  let folderId = e.parameter.folderId;
+  if (folderId == null){
+    return HtmlService.createHtmlOutput("<h1>Please add a folderId URL parameter to request.</h1><h3>I.e., Add '?folderId=q1w2e3' to end of URL in browser.</h3>");
+  }  
+
   const startingFolder = DriveApp.getFolderById(folderId);
   const fileArray = getFileArray(startingFolder, "");
+    
+  let ss = null;
+  const useSheets = new Boolean(true);
+  if (useSheets){
+    ss = SpreadsheetApp.create(name=startingFolder.getName() + "_files_sizes");
+    var sheet = ss.getSheets()[0];
+    sheet.appendRow(["name", "path", "id", "bytes", "size","mime", "url"])
+  }
   
   let totalSize = 0;
-  let ss = SpreadsheetApp.create(name=startingFolder.getName() + "_files_sizes");
-  var sheet = ss.getSheets()[0];
-  sheet.appendRow(["name", "path", "id", "bytes", "size","mime", "url"])
-
+  let csvArray = [];
   fileArray.forEach((f) => {
     totalSize += f.size;
-    sheet.appendRow([f.name, f.path, f.id, f.size, f.hSize,f.mime, f.url])
+    if (useSheets){
+      sheet.appendRow([f.name, f.path, f.id, f.size, f.hSize,f.mime, f.url])
+    }
+    csvArray.push(Object.values(f));
   });
-  sheet.setFrozenRows(1);
+  if (useSheets){
+    sheet.setFrozenRows(1);
+  }
   
+  let data = {};  
   data["title"] = startingFolder.getName();
   data["totalSize"] = formatSize(totalSize, 2);
   data["files"] = fileArray;
-  data['sheetsUrl'] = ss.getUrl();
+  data["csvArray"] = csvArray;
 
+  if (useSheets){
+    data['sheetsUrl'] = ss.getUrl();
+  } else {
+    data['sheetsUrl'] = 'NOT_USING_SHEETS';
+  }
+  
   const html = HtmlService.createTemplateFromFile('index');
   html.data = data;
   const output = html.evaluate();
   return output;
 }
-
-
-
-
-
-
-
-
-
-
